@@ -5,4 +5,4 @@ trap "kill -TERM -$pgrp; exit" EXIT TERM KILL SIGKILL SIGTERM SIGQUIT
 
 
 source /etc/apache2/envvars
-apache2 -D FOREGROUND
+#apache2 -D FOREGROUND

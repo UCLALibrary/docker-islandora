@@ -1,7 +1,9 @@
 #!/bin/bash
 if [ ! -f /var/www/sites/default/settings.php ]; then
 	# Start mysql
-	/usr/bin/mysqld_safe & 
+	/usr/bin/mysqld_safe &
+	# Start apache 
+	service apache2 start
 	sleep 10s
 	# Generate random passwords 
 	DRUPAL_DB="drupal"
@@ -13,6 +15,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	echo $MYSQL_PASSWORD > /mysql-root-pw.txt
 	echo $DRUPAL_PASSWORD > /drupal-db-pw.txt
 	mysqladmin -u root password $MYSQL_PASSWORD 
+
 	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL PRIVILEGES ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
 	sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
 	a2enmod rewrite vhost_alias
@@ -20,7 +23,9 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
 	drush pm-download views advanced_help ctools imagemagick token libraries
 	drush pm-enable views advanced_help ctools imagemagick token libraries
-	killall mysqld
-	sleep 10s
+
+
+	#killall mysqld
+	#sleep 10s
 fi
 supervisord -n

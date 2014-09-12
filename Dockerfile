@@ -7,47 +7,62 @@ RUN apt-get update
 RUN apt-get -y upgrade
 RUN dpkg --configure -a
 RUN apt-get clean
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential vim python-setuptools software-properties-common python-software-properties libc6-dev libgnutls-dev gnutls-bin libxml2 libxslt1.1 libxml2-dev libxslt-dev xsltproc curl libcurl3 libcurl3-dev php5-curl php5-curl zlib1g-dev graphicsmagick libmagickwand-dev libapache2-mod-proxy-html libxml2 libxml2-dev php5-curl php-soap php5-xsl libxslt1-dev libxslt1.1 lame libimage-exiftool-perl ffmpeg2theora subversion libleptonica-dev isomd5sum libx264-dev x264 libx264-142 avinfo mkvtoolnix libfaac-dev libfaac0 libxml2-utils libopenjpeg2 libopenjpeg-dev libavcodec-extra-54 libavdevice-extra-53 libavfilter-extra-3 libavformat-extra-54 libavutil-extra-52 libpostproc-dev libswscale-extra-2 libdc1394-22 libdc1394-22-dev libgsm1 libgsm1-dev libopenjpeg-dev yasm libvpx-dev libvpx1 apache2 apache2-doc apache2-mpm-prefork apache2-utils ssl-cert libapache2-mod-php5 php5 php5-common php5-gd php5-mysql php5-imap php5-cli php5-cgi libapache2-mod-fcgid apache2-suexec php-pear php-auth php5-mcrypt mcrypt php5-imagick imagemagick libapache2-mod-suphp libruby wget mysql-client mysql-server wget unzip libmysqlclient-dev libmagickcore-dev libmagickwand-dev ghostscript curl drush stow python-software-properties libkrb5-dev librtmp-dev libssl-dev libtasn1-6-dev libbz2-dev libdjvulibre-dev libexif-dev libfreetype6-dev libgraphviz-dev libjpeg-dev librsvg2-dev libtiff5-dev libwmf-dev libgnutls-dev libssl-doc libtasn1-6-dev libmp3lame-dev libopencore-amrnb0 libopencore-amrnb-dev libopencore-amrwb0 libopencore-amrwb-dev libschroedinger-dev libspeex-dev libtheora-dev libvorbis-dev libxvidcore-dev libxfixes-dev make automake g++
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install gcc build-essential yasm vim python-setuptools software-properties-common python-software-properties libc6-dev libgnutls-dev gnutls-bin libxml2 libxslt1.1 libxml2-dev libxslt-dev xsltproc curl libcurl3 libcurl3-dev php5-curl php5-curl zlib1g-dev graphicsmagick libmagickwand-dev libapache2-mod-proxy-html libxml2 libxml2-dev php5-curl php-soap php5-xsl libxslt1-dev libxslt1.1 lame libimage-exiftool-perl ffmpeg2theora subversion libleptonica-dev isomd5sum libx264-dev x264 libx264-142 avinfo mkvtoolnix libfaac-dev libfaac0 libxml2-utils libopenjpeg2 libopenjpeg-dev libavcodec-extra-54 libavdevice-extra-53 libavfilter-extra-3 libavformat-extra-54 libavutil-extra-52 libpostproc-dev libswscale-extra-2 libdc1394-22 libdc1394-22-dev libgsm1 libgsm1-dev libopenjpeg-dev yasm libvpx-dev libvpx1 apache2 apache2-doc apache2-mpm-prefork apache2-utils ssl-cert libapache2-mod-php5 php5 php5-common php5-gd php5-mysql php5-imap php5-cli php5-cgi libapache2-mod-fcgid apache2-suexec php-pear php-auth php5-mcrypt mcrypt php5-imagick imagemagick libapache2-mod-suphp libruby wget mysql-client mysql-server wget unzip libmysqlclient-dev libmagickcore-dev libmagickwand-dev ghostscript curl drush stow python-software-properties libkrb5-dev librtmp-dev libssl-dev libtasn1-6-dev libbz2-dev libdjvulibre-dev libexif-dev libfreetype6-dev libgraphviz-dev libjpeg-dev librsvg2-dev libtiff5-dev libwmf-dev libgnutls-dev libssl-doc libtasn1-6-dev libmp3lame-dev libopencore-amrnb0 libopencore-amrnb-dev libopencore-amrwb0 libopencore-amrwb-dev libschroedinger-dev libspeex-dev libtheora-dev libvorbis-dev libxvidcore-dev libxfixes-dev make automake g++ checkinstall
 
-# removed: libdvdcss2 libdvdcss2 apache2.2-common coreutils debianutils libexpat1 vim-tiny libssl1.0.0
+# Setup Drupal
+RUN cd /tmp
+RUN wget http://ftp.drupal.org/files/projects/drupal-7.22.tar.gz
+RUN tar -xzvf drupal-7.22.tar.gz
+RUN mkdir -p /var/www
+RUN mv -v drupal-7.22 /var/www
+RUN cd /var/www/drupal-7.22
+# done by the installer
+#ADD https://raw.githubusercontent.com/namka/configurations/master/drupal-7.22/settings.php sites/default/
+RUN mkdir -p sites/default/files
 
-RUN add-apt-repository ppa:webupd8team/java
-RUN apt-get -y update
-RUN echo "oracle-java6-installer  shared/accepted-oracle-license-v1-1 boolean true" | debconf-set-selections
-RUN apt-get -y install oracle-java6-installer
+# done on the start.sh file
+#RUN drush pm-download views advanced_help ctools imagemagick token libraries
+#RUN drush pm-enable views advanced_help ctools imagemagick token libraries
 
 RUN easy_install supervisor
 ADD ./start.sh /start.sh
 ADD ./foreground.sh /etc/apache2/foreground.sh
 ADD ./supervisord.conf /etc/supervisord.conf
 
+# Setup our enviroment
+RUN mkdir /usr/local/fedora
+RUN mkdir /opt/djatoka
+
+RUN update-rc.d mysql defaults
+RUN update-rc.d apache2 defaults
+
+RUN add-apt-repository ppa:webupd8team/java
+RUN apt-get -y update
+RUN echo "oracle-java7-installer  shared/accepted-oracle-license-v1-1 boolean true" | debconf-set-selections
+RUN echo eccolo
+RUN apt-get -y install oracle-java7-installer
+RUN echo eccolo2
+
 # Setup FFMPEG 1.1.14
 RUN cd /tmp
 RUN wget http://www.ffmpeg.org/releases/ffmpeg-1.1.14.tar.gz
 RUN tar xvfz ffmpeg-1.1.14.tar.gz
 RUN cd ffmpeg-1.1.14/
-RUN ./configure --enable-gpl --enable-version3 --enable-nonfree --enable-postproc --enable-x11grab --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfaac --enable-libgsm --enable-libmp3lame --enable-libopenjpeg --enable-libschroedinger --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libxvid --prefix=/usr/local/stow/ffmpeg-1.1.14
-RUN make
-RUN make install
+#RUN ./configure --enable-gpl --enable-version3 --enable-nonfree --enable-postproc --enable-x11grab --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfaac --enable-libgsm --enable-libmp3lame --enable-libopenjpeg --enable-libschroedinger --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libxvid --prefix=/usr/local/stow/ffmpeg-1.1.14
+#RUN make
+#RUN make install
 
 # Setup Tesseract 3.02.02 - /usr/local/stow/tesseract-ocr-3.02.02
 RUN cd /tmp
 RUN wget https://tesseract-ocr.googlecode.com/files/tesseract-ocr-3.02.02.tar.gz
 RUN tar xvfz tesseract-ocr-3.02.02.tar.gz
 RUN cd tesseract-ocr
-RUN ./autogen.sh
-RUN ./configure --prefix=/usr/local/stow/tesseract-ocr
-RUN make
-RUN make install
+#RUN ./autogen.sh
+#RUN ./configure --prefix=/usr/local/stow/tesseract-ocr
+#RUN make
+#RUN make install
 
-# Setup our enviroment
-RUN mkdir /usr/local/fedora
-RUN mkdir /opt/djatoka
-RUN service mysql start
-RUN update-rc.d mysql defaults
-RUN mysqladmin -u root password test
-RUN service apache2 start
-RUN update-rc.d apache2 defaults
+#RUN mysqladmin -u root password test
 
 #setup fedora database
 RUN mysql -u root -ptest  -e "create database fedora";
@@ -100,31 +115,15 @@ RUN cd /usr/local/djatoka/dist
 RUN cp adore-djatoka.war djatoka.war
 RUN cp djatoka.war $FEDORA_HOME/tomcat/webapps
 
-# Setup Drupal
-RUN cd /tmp
-RUN wget http://ftp.drupal.org/files/projects/drupal-7.22.tar.gz
-RUN tar -xzvf drupal-7.22.tar.gz
-RUN cd drupal-7.22
-RUN mv -v drupal-7.22 /var/www
-RUN cd /var/www/drupal-7.22
-# done by the installer
-#ADD https://raw.githubusercontent.com/namka/configurations/master/drupal-7.22/settings.php sites/default/
-mkdir sites/default/files
-
-
-# done on the start.sh file
-#RUN drush pm-download views advanced_help ctools imagemagick token libraries
-#RUN drush pm-enable views advanced_help ctools imagemagick token libraries
-
 # Fetch Islandora and solution packs
-RUN mkdir /var/www/drupal-7.22/sites/all/libraries
+RUN mkdir -p /var/www/drupal-7.22/sites/all/libraries
 RUN cd /var/www/drupal-7.22/sites/all/libraries
 RUN git clone -b 1.3 https://github.com/Islandora/tuque.git
 RUN git clone https://github.com/openlibrary/bookreader.git
 RUN git clone https://github.com/openseadragon/openseadragon.git
 RUN git clone https://github.com/jwplayer/jwplayer.git
 RUN cd /var/www/sites/all/modules
-# Don't forget to add the other libraries - IA bookreader, jwplayer, openseadragon
+
 RUN git clone -b 1.3 git://github.com/Islandora/islandora.git
 RUN git clone -b 1.3 git://github.com/Islandora/islandora_solution_pack_audio.git
 RUN git clone -b 1.3 git://github.com/Islandora/islandora_ocr.git
