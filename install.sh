@@ -27,6 +27,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	drush pm-download views advanced_help ctools imagemagick token libraries
 	drush pm-enable views advanced_help ctools imagemagick token libraries
 
+	drush pm-enable islandora islandora_solution_pack_audio  islandora_ocr islandora_importer islandora_solution_pack_book islandora_solr_views islandora_solr_search  islandora_pathauto islandora_paged_content islandora_xml_forms islandora_jwplayer islandora_fits islandora_bookmark islandora_solution_pack_large_image islandora_openseadragon islandora_solution_pack_pdf islandora_solution_pack_web_archive islandora_solution_pack_video islandora_marcxml islandora_internet_archive_bookreader islandora_oai islandora_solution_pack_image islandora islandora_solution_pack_collection islandora_batch islandora_checksum objective_forms php_lib 
+
 	#setup fedora database
 	mysql -u root -ptest  -e "create database fedora3";
 	mysql -u root -ptest  -e "GRANT ALL PRIVILEGES ON "fedora3".* TO 'fedoraAdmin'@'%' IDENTIFIED BY 'fedoraAdmin' WITH GRANT OPTION";
