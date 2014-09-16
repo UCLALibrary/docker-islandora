@@ -13,25 +13,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install gcc build-essential yasm v
 ADD http://ftp.drupal.org/files/projects/drupal-7.22.tar.gz /tmp/
 RUN tar -xzvf /tmp/drupal-7.22.tar.gz -C /tmp
 RUN mkdir -p /var/www/html
-RUN mv -v /tmp/drupal-7.22 /var/www
+RUN mv -v /tmp/drupal-7.22 /var/www/html/
 RUN cd /var/www/html/drupal-7.22; cp sites/default/default.settings.php sites/default/settings.php; mkdir -p sites/default/files;
-
-# done on the start.sh file
-#RUN drush pm-download views advanced_help ctools imagemagick token libraries
-#RUN drush pm-enable views advanced_help ctools imagemagick token libraries
-
-RUN easy_install supervisor
-ADD ./start.sh /start.sh
-ADD ./install.sh /install.sh
-ADD ./foreground.sh /etc/apache2/foreground.sh
-ADD ./supervisord.conf /etc/supervisord.conf
-RUN chown root.root /start.sh
-RUN chmod 750 /start.sh
-RUN chown root.root /install.sh
-RUN chmod 750 /install.sh
-
-# Setup our enviroment
-RUN mkdir -p /usr/local/fedora
 
 RUN update-rc.d mysql defaults
 RUN update-rc.d apache2 defaults
@@ -61,13 +44,10 @@ ADD http://downloads.sourceforge.net/project/fedora-commons/fedora/3.7.0/fcrepo-
 ADD https://raw.githubusercontent.com/namka/configurations/master/fedora-370/install.properties /tmp/
 
 # Setup GSearch
-#ADD http://downloads.sourceforge.net/fedora-commons/fedoragsearch-2.6.zip /tmp/
 ADD http://iweb.dl.sourceforge.net/project/fedora-commons/services/3.6/fedoragsearch-2.6.zip /tmp/
-RUN cd /tmp; unzip fedoragsearch-2.6.zip; mkdir -p /usr/local/fedora/tomcat/webapps; cp -v fedoragsearch-2.6/fedoragsearch.war /usr/local/fedora/tomcat/webapps
 
 # Setup Solr
 ADD https://archive.apache.org/dist/lucene/solr/4.2.0/solr-4.2.0.tgz /tmp/
-RUN cd /tmp; tar -xzvf solr-4.2.0.tgz; mkdir -p /usr/local/fedora/solr; cp -Rv solr-4.2.0/example/solr/* /usr/local/fedora/solr; cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
 
 RUN echo 'export FEDORA_HOME=/usr/local/fedora' >> /etc/profile && \
     echo 'export CATALINA_HOME=/usr/local/fedora/tomcat' >> /etc/profile && \
@@ -89,6 +69,7 @@ RUN cp /opt/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/djatoka.w
 RUN mkdir -p /var/www/html/drupal-7.22/sites/all/libraries/
 RUN cd /var/www/html/drupal-7.22/sites/all/libraries/; git clone -b 1.3 https://github.com/Islandora/tuque.git; git clone https://github.com/openlibrary/bookreader.git; git clone https://github.com/openseadragon/openseadragon.git; git clone https://github.com/jwplayer/jwplayer.git;
 
+RUN mkdir -p /var/www/html/drupal-7.22/sites/all/modules/;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_audio.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_ocr.git;
@@ -109,7 +90,6 @@ RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https:
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_internet_archive_bookreader.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_oai.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_image.git;
-RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_collection.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_batch.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/objective_forms.git;
@@ -131,6 +111,16 @@ RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.co
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/ppound/islandora_image_annotation.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/mitchmac/islandora_solution_pack_compound.git;
 RUN chown -hR www-data:www-data /var/www/html/
+
+RUN easy_install supervisor
+ADD ./start.sh /start.sh
+ADD ./install.sh /install.sh
+ADD ./foreground.sh /etc/apache2/foreground.sh
+ADD ./supervisord.conf /etc/supervisord.conf
+RUN chown root.root /start.sh
+RUN chmod 750 /start.sh
+RUN chown root.root /install.sh
+RUN chmod 750 /install.sh
 
 # Expose the application's ports:
 # 80: Drupal 

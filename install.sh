@@ -23,7 +23,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
 	sed -i '/DocumentRoot \/var\/www\/html/a AllowOverride All' /etc/apache2/sites-available/000-default.conf
 	a2enmod rewrite vhost_alias
-	cd /var/www/drupal-7.22
+	cd /var/www/html/drupal-7.22
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
 	drush pm-download -y views advanced_help ctools imagemagick token libraries
 	drush pm-enable -y views advanced_help ctools imagemagick token libraries
@@ -75,6 +75,16 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 
 	. /etc/profile
 	java -jar /tmp/fcrepo-installer-3.7.0.jar
+
+	# Set Gsearch
+	cd /tmp; unzip fedoragsearch-2.6.zip;
+	cp -v fedoragsearch-2.6/fedoragsearch.war /usr/local/fedora/tomcat/webapps
+
+	# Set Solr
+	cd /tmp; tar -xzvf solr-4.2.0.tgz; 
+	mkdir -p /usr/local/fedora/solr; 
+	cp -Rv solr-4.2.0/example/solr/* /usr/local/fedora/solr; 
+	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
 
 	$FEDORA_HOME/tomcat/bin/startup.sh
 	sleep 3s
