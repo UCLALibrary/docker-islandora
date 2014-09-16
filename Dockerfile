@@ -12,9 +12,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install gcc build-essential yasm v
 # Setup Drupal
 ADD http://ftp.drupal.org/files/projects/drupal-7.22.tar.gz /tmp/
 RUN tar -xzvf /tmp/drupal-7.22.tar.gz -C /tmp
-RUN mkdir -p /var/www
+RUN mkdir -p /var/www/html
 RUN mv -v /tmp/drupal-7.22 /var/www
-RUN cd /var/www/drupal-7.22; cp sites/default/default.settings.php sites/default/settings.php; mkdir -p sites/default/files;
+RUN cd /var/www/html/drupal-7.22; cp sites/default/default.settings.php sites/default/settings.php; mkdir -p sites/default/files;
 
 # done on the start.sh file
 #RUN drush pm-download views advanced_help ctools imagemagick token libraries
@@ -72,10 +72,10 @@ RUN cd /tmp; tar -xzvf solr-4.2.0.tgz; mkdir -p /usr/local/fedora/solr; cp -Rv s
 RUN echo 'export FEDORA_HOME=/usr/local/fedora' >> /etc/profile && \
     echo 'export CATALINA_HOME=/usr/local/fedora/tomcat' >> /etc/profile && \
     echo 'export JAVA_OPTS="-Xms1024m -Xmx1024m -XX:MaxPermSize=128m -Djavax.net.ssl.trustStore=/usr/local/fedora/server/truststore -Djavax.net.ssl.trustStorePassword=tomcat"' >> /etc/profile && \
-    echo 'export JAVA_HOME=/usr/lib/jvm/java-6-oracle' >> /etc/profile && \
+    echo 'export JAVA_HOME=/usr/lib/jvm/java-7-oracle' >> /etc/profile && \
     echo 'export ANT_HOME=/opt/ant' >> /etc/profile && \
     echo 'export KAKADU_LIBRARY_PATH=/opt/djatoka' >> /etc/profile && \
-    echo 'export JRE_HOME=/usr/lib/jvm/java-6-oracle/jre'
+    echo 'export JRE_HOME=/usr/lib/jvm/java-7-oracle/jre'
 
 # Setup DJATOKA
 ADD http://downloads.sourceforge.net/project/djatoka/djatoka/1.1/adore-djatoka-1.1.tar.gz /tmp/
@@ -86,11 +86,51 @@ RUN mkdir -p $FEDORA_HOME/tomcat/webapps
 RUN cp /opt/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/djatoka.war
 
 # Fetch Islandora and solution packs
-RUN mkdir -p /var/www/drupal-7.22/sites/all/libraries/
-RUN cd /var/www/drupal-7.22/sites/all/libraries/; git clone -b 1.3 https://github.com/Islandora/tuque.git; git clone https://github.com/openlibrary/bookreader.git; git clone https://github.com/openseadragon/openseadragon.git; git clone https://github.com/jwplayer/jwplayer.git;
+RUN mkdir -p /var/www/html/drupal-7.22/sites/all/libraries/
+RUN cd /var/www/html/drupal-7.22/sites/all/libraries/; git clone -b 1.3 https://github.com/Islandora/tuque.git; git clone https://github.com/openlibrary/bookreader.git; git clone https://github.com/openseadragon/openseadragon.git; git clone https://github.com/jwplayer/jwplayer.git;
 
-RUN cd /var/www/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 git://github.com/Islandora/islandora.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solution_pack_audio.git; git clone -b 7.x-1.3 git://github.com/Islandora/islandora_ocr.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_importer.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solution_pack_book.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solr_views.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solr_search.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solr_search/islandora_solr_config.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_pathauto.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_paged_content.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_xml_forms.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_jwplayer.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_fits.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_bookmark.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solution_pack_large_image.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_openseadragon.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solution_pack_pdf.git;git clone -b 7.x-1.3 git://github.com/ruebot/islandora_solution_pack_web_archive.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solution_pack_video.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_marcxml.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_internet_archive_bookreader.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_oai.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solution_pack_image.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_solution_pack_collection.git;git clone -b 7.x-1.3 git://github.com/Islandora/islandora_batch.git;git clone -b 7.x-1.3 git://github.com/ruebot/islandora_checksum.git;git clone -b 7.x-1.3 git://github.com/Islandora/objective_forms.git;git clone -b 7.x-1.3 git://github.com/Islandora/php_lib.git;
-RUN chown -hR www-data:www-data /var/www/
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_audio.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_ocr.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_importer.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_book.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.4 https://github.com/Islandora/islandora_solr_views.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solr_search.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_paged_content.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_xml_forms.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_jwplayer.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_fits.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_bookmark.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_large_image.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_openseadragon.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_pdf.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_video.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_marcxml.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_internet_archive_bookreader.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_oai.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_image.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_collection.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_batch.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/objective_forms.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/php_lib.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_bagit.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_premis.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_scholar.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solr_facet_pages.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_newspaper.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_xacml_editor.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_xmlsitemap.git;
+
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/ruebot/islandora_solution_pack_web_archive.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/ruebot/islandora_checksum.git;
+
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/adam-vessey/islandora_book_batch.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/adam-vessey/islandora_solr_metadata.git;
+
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/ppound/islandora_image_annotation.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/mitchmac/islandora_solution_pack_compound.git;
+RUN chown -hR www-data:www-data /var/www/html/
 
 # Expose the application's ports:
 # 80: Drupal 

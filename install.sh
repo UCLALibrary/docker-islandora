@@ -20,23 +20,57 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	mysqladmin -u root password $MYSQL_PASSWORD 
 
 	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL PRIVILEGES ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
-	sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
+	#sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
+	sed -i '/DocumentRoot \/var\/www\/html/a AllowOverride All' /etc/apache2/sites-available/000-default.conf
 	a2enmod rewrite vhost_alias
 	cd /var/www/drupal-7.22
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
-	drush pm-download views advanced_help ctools imagemagick token libraries
-	drush pm-enable views advanced_help ctools imagemagick token libraries
+	drush pm-download -y views advanced_help ctools imagemagick token libraries
+	drush pm-enable -y views advanced_help ctools imagemagick token libraries
 
-	drush pm-enable islandora islandora_solution_pack_audio  islandora_ocr islandora_importer islandora_solution_pack_book islandora_solr_views islandora_solr_search  islandora_pathauto islandora_paged_content islandora_xml_forms islandora_jwplayer islandora_fits islandora_bookmark islandora_solution_pack_large_image islandora_openseadragon islandora_solution_pack_pdf islandora_solution_pack_web_archive islandora_solution_pack_video islandora_marcxml islandora_internet_archive_bookreader islandora_oai islandora_solution_pack_image islandora islandora_solution_pack_collection islandora_batch islandora_checksum objective_forms php_lib 
+	drush pm-enable -y objective_forms
+	drush pm-enable -y php_lib
+
+	drush pm-enable -y islandora
+	drush pm-enable -y islandora_solution_pack_audio
+	drush pm-enable -y islandora_ocr
+	drush pm-enable -y islandora_importer
+	drush pm-enable -y islandora_solution_pack_book
+	drush pm-enable -y islandora_solr_views
+	drush pm-enable -y islandora_solr_search
+	drush pm-enable -y islandora_paged_content
+	drush pm-enable -y islandora_xml_forms
+	drush pm-enable -y islandora_jwplayer
+	drush pm-enable -y islandora_fits
+	drush pm-enable -y islandora_bookmark
+	drush pm-enable -y islandora_solution_pack_large_image
+	drush pm-enable -y islandora_openseadragon
+	drush pm-enable -y islandora_solution_pack_pdf
+	drush pm-enable -y islandora_solution_pack_video
+	drush pm-enable -y islandora_marcxml
+	drush pm-enable -y islandora_internet_archive_bookreader
+	drush pm-enable -y islandora_oai
+	drush pm-enable -y islandora_solution_pack_image
+	drush pm-enable -y islandora
+	drush pm-enable -y islandora_solution_pack_collection
+	drush pm-enable -y islandora_batch
+	drush pm-enable -y islandora_bagit
+	drush pm-enable -y islandora_premis
+	drush pm-enable -y islandora_scholar
+	drush pm-enable -y islandora_solr_facet_pages
+	drush pm-enable -y islandora_solution_pack_newspaper
+	drush pm-enable -y islandora_xacml_editor
+	drush pm-enable -y islandora_xmlsitemap
+	drush pm-enable -y islandora_solution_pack_web_archive
+	drush pm-enable -y islandora_checksum
+	drush pm-enable -y islandora_book_batch
+	drush pm-enable -y islandora_solr_metadata
+	drush pm-enable -y islandora_image_annotation
+	drush pm-enable -y islandora_solution_pack_compound
 
 	#setup fedora database
 	mysql -u root -ptest  -e "create database fedora3";
 	mysql -u root -ptest  -e "GRANT ALL PRIVILEGES ON "fedora3".* TO 'fedoraAdmin'@'%' IDENTIFIED BY 'fedoraAdmin' WITH GRANT OPTION";
-	mysql -u root -ptest  -e "flush privileges";
-
-	# setup drupal database 
-	mysql -u root -ptest  -e "create database drupal";
-	mysql -u root -ptest  -e "GRANT ALL PRIVILEGES ON "drupal".* TO 'drupal'@'%' IDENTIFIED BY 'drupalAdmin' WITH GRANT OPTION";
 	mysql -u root -ptest  -e "flush privileges";
 
 	. /etc/profile
@@ -64,8 +98,6 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	rm fgsconfig-basic-for-islandora.properties
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
 	ant -f fgsconfig-basic.xml
-
-	echo "ciaoooooooo"
 
 	$FEDORA_HOME/tomcat/bin/startup.sh
 
