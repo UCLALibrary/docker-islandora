@@ -61,7 +61,8 @@ ADD http://downloads.sourceforge.net/project/fedora-commons/fedora/3.7.0/fcrepo-
 ADD https://raw.githubusercontent.com/namka/configurations/master/fedora-370/install.properties /tmp/
 
 # Setup GSearch
-ADD http://downloads.sourceforge.net/fedora-commons/fedoragsearch-2.6.zip /tmp/
+#ADD http://downloads.sourceforge.net/fedora-commons/fedoragsearch-2.6.zip /tmp/
+ADD http://iweb.dl.sourceforge.net/project/fedora-commons/services/3.6/fedoragsearch-2.6.zip /tmp/
 RUN cd /tmp; unzip fedoragsearch-2.6.zip; mkdir -p /usr/local/fedora/tomcat/webapps; cp -v fedoragsearch-2.6/fedoragsearch.war /usr/local/fedora/tomcat/webapps
 
 # Setup Solr
