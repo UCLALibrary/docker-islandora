@@ -73,7 +73,13 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	cd /var/www/html/drupal-7.22
 	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
 
+	chmod a+w sites/default/settings.php
+	chmod a+w sites/default
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
+
+	
+
+
 	drush pm-download -y views advanced_help ctools imagemagick token libraries
 	drush pm-enable -y views advanced_help ctools imagemagick token libraries
 
@@ -116,6 +122,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	drush pm-enable -y islandora_solr_metadata
 	drush pm-enable -y islandora_image_annotation
 	drush pm-enable -y islandora_solution_pack_compound
+
+	drush updatedb
 
 	#setup fedora database
 	mysql -u root -p$MYSQL_PASSWORD  -e "create database fedora3";
