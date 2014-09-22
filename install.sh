@@ -10,8 +10,10 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	sleep 10s
 	# Generate random passwords 
 	DRUPAL_DB="drupal"
-	MYSQL_PASSWORD='test'
 	DRUPAL_PASSWORD='drupalAdmin'
+
+	MYSQL_PASSWORD='test'
+	
 	# This is so the passwords show up in logs. 
 	echo mysql root password: $MYSQL_PASSWORD
 	echo drupal password: $DRUPAL_PASSWORD
@@ -19,11 +21,14 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	echo $DRUPAL_PASSWORD > /drupal-db-pw.txt
 	mysqladmin -u root password $MYSQL_PASSWORD 
 
-	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL PRIVILEGES ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
+	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT INSERT, SELECT, DELETE, UPDATE ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
+
 	#sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
 	sed -i '/DocumentRoot \/var\/www\/html/a AllowOverride All' /etc/apache2/sites-available/000-default.conf
 	a2enmod rewrite vhost_alias
 	cd /var/www/html/drupal-7.22
+	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
+
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
 	drush pm-download -y views advanced_help ctools imagemagick token libraries
 	drush pm-enable -y views advanced_help ctools imagemagick token libraries
@@ -69,12 +74,15 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	drush pm-enable -y islandora_solution_pack_compound
 
 	#setup fedora database
-	mysql -u root -ptest  -e "create database fedora3";
-	mysql -u root -ptest  -e "GRANT ALL PRIVILEGES ON "fedora3".* TO 'fedoraAdmin'@'%' IDENTIFIED BY 'fedoraAdmin' WITH GRANT OPTION";
-	mysql -u root -ptest  -e "flush privileges";
+	mysql -u root -p$MYSQL_PASSWORD  -e "create database fedora3";
+	mysql -u root -p$MYSQL_PASSWORD  -e "GRANT INSERT, SELECT, DELETE, UPDATE ON "fedora3".* TO 'fedoraAdmin'@'%' IDENTIFIED BY 'fedoraAdmin'";
+	mysql -u root -p$MYSQL_PASSWORD  -e "GRANT INSERT, SELECT, DELETE, UPDATE ON "fedora3".* TO 'fedoraAdmin'@'localhost' IDENTIFIED BY 'fedoraAdmin'";
+	mysql -u root -p$MYSQL_PASSWORD  -e "flush privileges";
 
 	. /etc/profile
 	java -jar /tmp/fcrepo-installer-3.7.0.jar
+
+	sleep 5s
 
 	# Set Gsearch
 	cd /tmp; unzip fedoragsearch-2.6.zip;
@@ -87,7 +95,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
 
 	$FEDORA_HOME/tomcat/bin/startup.sh
-	sleep 3s
+	sleep 10s
 	$FEDORA_HOME/tomcat/bin/shutdown.sh
 	sleep 3s
 
@@ -114,8 +122,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	sleep 10s
 
 	# Copy islandora XACML policies
-	cp -v /var/www/islandora/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
-	rm $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
+	cp -v /var/www/html/drupal-7.22/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
+	#rm $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
 	
 fi
 #supervisord -n
