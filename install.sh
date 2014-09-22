@@ -66,7 +66,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 
 	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT INSERT, SELECT, DELETE, UPDATE ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
 
-	#sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/sites-available/default
+	sed -i 's/min_uid=100/min_uid=30/' /etc/suphp/suphp.conf
+	sed -i 's/min_gid=100/min_gid=30/' /etc/suphp/suphp.conf
 	sed -i '/DocumentRoot \/var\/www\/html/a AllowOverride All' /etc/apache2/sites-available/000-default.conf
 	a2enmod rewrite vhost_alias
 	cd /var/www/html/drupal-7.22
