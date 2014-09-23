@@ -74,7 +74,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 
 	sed -i 's/min_uid=100/min_uid=30/' /etc/suphp/suphp.conf
 	sed -i 's/min_gid=100/min_gid=30/' /etc/suphp/suphp.conf
-	#sed -i '/DocumentRoot \/var\/www\/html/a AllowOverride All' /etc/apache2/sites-available/000-default.conf
+	sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www\/html\/drupal/' /etc/apache2/sites-available/000-default.conf
+	sed -i '/DocumentRoot \/var\/www\/html\/drupal/a <Directory "/var/www/html/drupal"> \n Options Includes \n AllowOverride All \n </Directory>' /etc/apache2/sites-available/000-default.conf
 	a2enmod rewrite vhost_alias
 	cd /var/www/html/drupal-7.22
 	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
