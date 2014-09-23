@@ -8,6 +8,9 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# Start apache 
 	service apache2 start
 	sleep 5
+
+	. /etc/profile
+
 	# Generate random passwords 
 	DRUPAL_DB="drupal"
 	DRUPAL_PASSWORD='drupalAdmin'
@@ -27,35 +30,55 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	mysql -u root -p$MYSQL_PASSWORD  -e "GRANT ALL ON "fedora3".* TO 'fedoraAdmin'@'localhost' IDENTIFIED BY 'fedoraAdmin'";
 	mysql -u root -p$MYSQL_PASSWORD  -e "flush privileges";
 
-	# Set Fedora
-	. /etc/profile
-	java -jar /tmp/fcrepo-installer-3.7.0.jar
-
-	sleep 5
-
-	# Set Gsearch
-	cd /tmp; unzip fedoragsearch-2.6.zip;
-	cp -v fedoragsearch-2.6/fedoragsearch.war /usr/local/fedora/tomcat/webapps
-
-	# Set Solr
-	cd /tmp; tar -xzvf solr-4.2.0.tgz; 
-	mkdir -p /usr/local/fedora/solr; 
-	cp -Rv solr-4.2.0/example/solr/* /usr/local/fedora/solr; 
-	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
-
-	/usr/local/fedora/tomcat/bin/startup.sh
+	# 
+	# Installing Fedora
+	#
+	java -jar /tmp/fcrepo-installer-3.7.0.jar /tmp/install.properties
+	/usr/local/fedora/tomcat/bin/startup.sh 
 	sleep 10
 	/usr/local/fedora/tomcat/bin/shutdown.sh
-	sleep 3
 
+	# 
+	# Remove XACML policies
+	#
 	rm -v /usr/local/fedora/data/fedora-xacml-policies/repository-policies/default/deny-purge-*
 	# Copy islandora XACML policies
 	mkdir /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
 	cp -v /var/www/html/drupal-7.22/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
 	#rm $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
-	/usr/local/fedora/server/bin/fedora-reload-policies.sh
 	sed -i 's/value="enforce-policies"/value="permit-all-requests"/' /usr/local/fedora/server/config/fedora.fcfg
+	/usr/local/fedora/server/bin/fedora-reload-policies.sh
+	
+	$FEDORA_HOME/tomcat/bin/startup.sh
+	sleep 10
 
+	# 
+	# Install Drupal
+	#
+	service apache2 stop
+	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
+	sed -i 's/min_uid=100/min_uid=30/' /etc/suphp/suphp.conf
+	sed -i 's/min_gid=100/min_gid=30/' /etc/suphp/suphp.conf
+	sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www\/html\/drupal/' /etc/apache2/sites-available/000-default.conf
+	sed -i '/DocumentRoot \/var\/www\/html\/drupal/a <Directory "/var/www/html/drupal"> \n Options Includes \n AllowOverride All \n </Directory>' /etc/apache2/sites-available/000-default.conf
+	a2enmod rewrite vhost_alias
+	cd /var/www/html/drupal-7.22
+	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
+	chmod a+w sites/default/settings.php
+	chmod a+w sites/default
+
+	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
+	drush pm-download -y views advanced_help ctools imagemagick token libraries
+	drush pm-enable -y views advanced_help ctools imagemagick token libraries
+	drush pm-enable -y objective_forms
+	drush pm-enable -y php_lib
+	service apache2 start
+
+	#
+	# Configure Drupal Filter
+	#
+	/usr/local/fedora/tomcat/bin/shutdown.sh
+	sleep 5
 	cd /tmp
 	wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.0.jar
 	cp -v fcrepo-drupalauthfilter-3.7.0.jar $FEDORA_HOME/tomcat/webapps/fedora/WEB-INF/lib
@@ -65,41 +88,15 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/filter-drupal.xml
 	rm $FEDORA_HOME/server/config/fedora-users.xml
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
+	$FEDORA_HOME/tomcat/bin/startup.sh
+	sleep 10
 
-	cd $FEDORA_HOME/tomcat/webapps/fedoragsearch/FgsConfig/
-	rm fgsconfig-basic-for-islandora.properties
-	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
-	ant -f fgsconfig-basic.xml
-
-	# disable peer certificate validation on tuque library
+	# Tuque library - disable peer certificate validation on tuque library
 	sed -i 's/public $verifyPeer = TRUE;/public $verifyPeer = FALSE;/' /var/www/html/drupal/sites/all/libraries/tuque/HttpConnection.php
 
-	/usr/local/fedora/tomcat/bin/startup.sh
-
-	sleep 15
-
-	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
-
-	sed -i 's/min_uid=100/min_uid=30/' /etc/suphp/suphp.conf
-	sed -i 's/min_gid=100/min_gid=30/' /etc/suphp/suphp.conf
-	sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www\/html\/drupal/' /etc/apache2/sites-available/000-default.conf
-	sed -i '/DocumentRoot \/var\/www\/html\/drupal/a <Directory "/var/www/html/drupal"> \n Options Includes \n AllowOverride All \n </Directory>' /etc/apache2/sites-available/000-default.conf
-	a2enmod rewrite vhost_alias
-	cd /var/www/html/drupal-7.22
-	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
-
-	chmod a+w sites/default/settings.php
-	chmod a+w sites/default
-	service apache2 restart
-
-	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
-
-	drush pm-download -y views advanced_help ctools imagemagick token libraries
-	drush pm-enable -y views advanced_help ctools imagemagick token libraries
-
-	drush pm-enable -y objective_forms
-	drush pm-enable -y php_lib
-
+	#
+	# Install islandora
+	#
 	drush pm-enable -y islandora
 	drush pm-enable -y islandora_solution_pack_audio
 	drush pm-enable -y islandora_ocr
@@ -139,6 +136,28 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 
 	drush updatedb
 
+	# Set Gsearch
+	cd /tmp; unzip fedoragsearch-2.6.zip;
+	cp -v fedoragsearch-2.6/fedoragsearch.war /usr/local/fedora/tomcat/webapps
+
+	# Set Solr
+	cd /tmp; tar -xzvf solr-4.2.0.tgz; 
+	mkdir -p /usr/local/fedora/solr; 
+	cp -Rv solr-4.2.0/example/solr/* /usr/local/fedora/solr; 
+	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
+
+	/usr/local/fedora/tomcat/bin/shutdown.sh
+	sleep 5
+	/usr/local/fedora/tomcat/bin/startup.sh
+	sleep 5
+	cd $FEDORA_HOME/tomcat/webapps/fedoragsearch/FgsConfig/
+	rm fgsconfig-basic-for-islandora.properties
+	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
+	ant -f fgsconfig-basic.xml
+
+	
+	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configForIslandora/fgsconfigFinal/index/FgsIndexconf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
+	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configProductionSolr/fgsconfigFinal/index/FgsIndex/conf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
 	/usr/local/fedora/tomcat/bin/shutdown.sh
 	sleep 5
 	/usr/local/fedora/tomcat/bin/startup.sh
