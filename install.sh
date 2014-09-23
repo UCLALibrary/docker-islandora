@@ -7,7 +7,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	/usr/bin/mysqld_safe &
 	# Start apache 
 	service apache2 start
-	sleep 10s
+	sleep 5
 	# Generate random passwords 
 	DRUPAL_DB="drupal"
 	DRUPAL_PASSWORD='drupalAdmin'
@@ -31,7 +31,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	. /etc/profile
 	java -jar /tmp/fcrepo-installer-3.7.0.jar
 
-	sleep 5s
+	sleep 5
 
 	# Set Gsearch
 	cd /tmp; unzip fedoragsearch-2.6.zip;
@@ -43,13 +43,18 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	cp -Rv solr-4.2.0/example/solr/* /usr/local/fedora/solr; 
 	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
 
-	$FEDORA_HOME/tomcat/bin/startup.sh
-	sleep 10s
-	$FEDORA_HOME/tomcat/bin/shutdown.sh
-	sleep 3s
+	/usr/local/fedora/tomcat/bin/startup.sh
+	sleep 10
+	/usr/local/fedora/tomcat/bin/shutdown.sh
+	sleep 3
 
 	rm -v /usr/local/fedora/data/fedora-xacml-policies/repository-policies/default/deny-purge-*
+	# Copy islandora XACML policies
 	mkdir /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
+	cp -v /var/www/html/drupal-7.22/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
+	#rm $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
+	/usr/local/fedora/server/bin/fedora-reload-policies.sh
+	sed -i 's/value="enforce-policies"/value="permit-all-requests"/' /usr/local/fedora/server/config/fedora.fcfg
 
 	cd /tmp
 	wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.0.jar
@@ -66,9 +71,12 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
 	ant -f fgsconfig-basic.xml
 
-	$FEDORA_HOME/tomcat/bin/startup.sh
+	# disable peer certificate validation on tuque library
+	sed -i 's/public $verifyPeer = TRUE;/public $verifyPeer = FALSE;/' /var/www/html/drupal/sites/all/libraries/tuque/HttpConnection.php
 
-	sleep 10s
+	/usr/local/fedora/tomcat/bin/startup.sh
+
+	sleep 15
 
 	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
 
@@ -80,11 +88,10 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	cd /var/www/html/drupal-7.22
 	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
 
-	# disable peer certificate validation on tuque library
-	sed -i 's/public $verifyPeer = TRUE;/public $verifyPeer = FALSE;/' /var/www/html/drupal/sites/all/libraries/tuque/HttpConnection.php
-
 	chmod a+w sites/default/settings.php
 	chmod a+w sites/default
+	service apache2 restart
+
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
 
 	drush pm-download -y views advanced_help ctools imagemagick token libraries
@@ -132,9 +139,11 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 
 	drush updatedb
 
-	# Copy islandora XACML policies
-	cp -v /var/www/html/drupal-7.22/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
-	#rm $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
+	/usr/local/fedora/tomcat/bin/shutdown.sh
+	sleep 5
+	/usr/local/fedora/tomcat/bin/startup.sh
+	sleep 5
+	service apache2 restart
 	
 fi
 #supervisord -n
