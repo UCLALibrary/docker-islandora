@@ -80,6 +80,9 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	cd /var/www/html/drupal-7.22
 	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
 
+	# disable peer certificate validation on tuque library
+	sed -i 's/public $verifyPeer = TRUE;/public $verifyPeer = FALSE;/' /var/www/html/drupal/sites/all/libraries/tuque/HttpConnection.php
+
 	chmod a+w sites/default/settings.php
 	chmod a+w sites/default
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
