@@ -37,13 +37,13 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#java -jar /tmp/fcrepo-installer-3.7.0.jar
 	java -jar /tmp/fcrepo-installer-3.7.0.jar /tmp/install.properties
 	/usr/local/fedora/tomcat/bin/startup.sh 
-	sleep 10
+	sleep 20
 	/usr/local/fedora/tomcat/bin/shutdown.sh
 
 	# 
 	# Remove XACML policies
 	#
-	rm -v /usr/local/fedora/data/fedora-xacml-policies/repository-policies/default/deny-purge-*
+	rm -v /usr/local/fedora/data/fedora-xacml-policies/repository-policies/default/deny-*
 	# Copy islandora XACML policies
 	mkdir /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
 	cp -v /var/www/html/drupal-7.22/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
@@ -69,13 +69,14 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
 	chmod a+w sites/default/settings.php
 	chmod a+w sites/default
+	service apache2 start
 
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
 	drush pm-download -y views advanced_help ctools imagemagick token libraries
 	drush pm-enable -y views advanced_help ctools imagemagick token libraries
 	drush pm-enable -y objective_forms
 	drush pm-enable -y php_lib
-	service apache2 start
+	service apache2 restart
 
 	#
 	# Configure Drupal Filter
