@@ -83,16 +83,17 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	/usr/local/fedora/tomcat/bin/shutdown.sh
 	sleep 10
 	cd /tmp
-	#wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.0.jar
-	wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.1.jar
-	cp -v fcrepo-drupalauthfilter-3.7.0.jar $FEDORA_HOME/tomcat/webapps/fedora/WEB-INF/lib
+	wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.0.jar
+	#wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.1.jar
+	cp -v fcrepo-drupalauthfilter-3.7.0.jar /usr/local/fedora/tomcat/webapps/fedora/WEB-INF/lib
 	cd /usr/local/fedora/server/config
 	rm jaas.conf
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/jaas.conf
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/filter-drupal.xml
 	rm $FEDORA_HOME/server/config/fedora-users.xml
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
-	$FEDORA_HOME/tomcat/bin/startup.sh
+
+	/usr/local/fedora/tomcat/bin/startup.sh
 	sleep 10
 
 	# Tuque library - disable peer certificate validation on tuque library
