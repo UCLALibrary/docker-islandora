@@ -34,7 +34,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# 
 	# Installing Fedora
 	#
-	java -jar /tmp/fcrepo-installer-3.7.0.jar #/tmp/install.properties
+	#java -jar /tmp/fcrepo-installer-3.7.0.jar
+	java -jar /tmp/fcrepo-installer-3.7.0.jar /tmp/install.properties
 	/usr/local/fedora/tomcat/bin/startup.sh 
 	sleep 10
 	/usr/local/fedora/tomcat/bin/shutdown.sh
@@ -101,41 +102,41 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# Install islandora
 	#
 	cd /var/www/html/drupal-7.22
-	drush pm-enable -y islandora
-	drush pm-enable -y islandora_ocr
-	drush pm-enable -y islandora_importer
-	drush pm-enable -y islandora_solr_views
-	drush pm-enable -y islandora_solr_search
-	drush pm-enable -y islandora_paged_content
-	drush pm-enable -y islandora_xml_forms
-	drush pm-enable -y islandora_jwplayer
-	drush pm-enable -y islandora_fits
-	drush pm-enable -y islandora_bookmark
-	drush pm-enable -y islandora_solution_pack_book
-	drush pm-enable -y islandora_solution_pack_audio
-	drush pm-enable -y islandora_solution_pack_large_image
-	drush pm-enable -y islandora_solution_pack_image
-	drush pm-enable -y islandora_solution_pack_collection
-	drush pm-enable -y islandora_solution_pack_pdf
-	drush pm-enable -y islandora_solution_pack_video
-	drush pm-enable -y islandora_solution_pack_newspaper
-	drush pm-enable -y islandora_solution_pack_web_archive
-	drush pm-enable -y islandora_solution_pack_compound
-	drush pm-enable -y islandora_openseadragon
-	drush pm-enable -y islandora_marcxml
-	drush pm-enable -y islandora_internet_archive_bookreader
-	drush pm-enable -y islandora_oai
-	drush pm-enable -y islandora_batch
-	drush pm-enable -y islandora_bagit
-	drush pm-enable -y islandora_premis
-	drush pm-enable -y islandora_scholar
-	drush pm-enable -y islandora_solr_facet_pages
-	drush pm-enable -y islandora_xacml_editor
-	drush pm-enable -y islandora_xmlsitemap
-	drush pm-enable -y islandora_checksum
-	drush pm-enable -y islandora_book_batch
-	drush pm-enable -y islandora_solr_metadata
-	drush pm-enable -y islandora_image_annotation
+	drush pm-enable -y -u 1 islandora
+	drush pm-enable -y -u 1 islandora_ocr
+	drush pm-enable -y -u 1 islandora_importer
+	drush pm-enable -y -u 1 islandora_solr_views
+	drush pm-enable -y -u 1 islandora_solr_search
+	drush pm-enable -y -u 1 islandora_paged_content
+	drush pm-enable -y -u 1 islandora_xml_forms
+	drush pm-enable -y -u 1 islandora_jwplayer
+	drush pm-enable -y -u 1 islandora_fits
+	drush pm-enable -y -u 1 islandora_bookmark
+	drush pm-enable -y -u 1 islandora_solution_pack_book
+	drush pm-enable -y -u 1 islandora_solution_pack_audio
+	drush pm-enable -y -u 1 islandora_solution_pack_large_image
+	drush pm-enable -y -u 1 islandora_solution_pack_image
+	drush pm-enable -y -u 1 islandora_solution_pack_collection
+	drush pm-enable -y -u 1 islandora_solution_pack_pdf
+	drush pm-enable -y -u 1 islandora_solution_pack_video
+	drush pm-enable -y -u 1 islandora_solution_pack_newspaper
+	drush pm-enable -y -u 1 islandora_solution_pack_web_archive
+	drush pm-enable -y -u 1 islandora_solution_pack_compound
+	drush pm-enable -y -u 1 islandora_openseadragon
+	drush pm-enable -y -u 1 islandora_marcxml
+	drush pm-enable -y -u 1 islandora_internet_archive_bookreader
+	drush pm-enable -y -u 1 islandora_oai
+	drush pm-enable -y -u 1 islandora_batch
+	drush pm-enable -y -u 1 islandora_bagit
+	drush pm-enable -y -u 1 islandora_premis
+	drush pm-enable -y -u 1 islandora_scholar
+	drush pm-enable -y -u 1 islandora_solr_facet_pages
+	drush pm-enable -y -u 1 islandora_xacml_editor
+	drush pm-enable -y -u 1 islandora_xmlsitemap
+	drush pm-enable -y -u 1 islandora_checksum
+	drush pm-enable -y -u 1 islandora_book_batch
+	drush pm-enable -y -u 1 islandora_solr_metadata
+	drush pm-enable -y -u 1 islandora_image_annotation
 
 	drush updatedb
 
