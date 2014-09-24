@@ -13,6 +13,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 
 	# Generate random passwords 
 	DRUPAL_DB="drupal"
+	DRUPAL_USER="drupal"
 	DRUPAL_PASSWORD='drupalAdmin'
 
 	MYSQL_PASSWORD='test'
@@ -33,7 +34,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# 
 	# Installing Fedora
 	#
-	java -jar /tmp/fcrepo-installer-3.7.0.jar /tmp/install.properties
+	java -jar /tmp/fcrepo-installer-3.7.0.jar #/tmp/install.properties
 	/usr/local/fedora/tomcat/bin/startup.sh 
 	sleep 10
 	/usr/local/fedora/tomcat/bin/shutdown.sh
@@ -56,7 +57,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# Install Drupal
 	#
 	service apache2 stop
-	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL ON drupal.* TO 'drupal'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
+	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL ON drupal.* TO '$DRUPAL_USER'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
+	mysql -uroot -p$MYSQL_PASSWORD -e "GRANT ALL ON drupal.* TO 'drupal'@'%' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
 	sed -i 's/min_uid=100/min_uid=30/' /etc/suphp/suphp.conf
 	sed -i 's/min_gid=100/min_gid=30/' /etc/suphp/suphp.conf
 	sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www\/html\/drupal/' /etc/apache2/sites-available/000-default.conf
@@ -78,7 +80,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# Configure Drupal Filter
 	#
 	/usr/local/fedora/tomcat/bin/shutdown.sh
-	sleep 5
+	sleep 10
 	cd /tmp
 	wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.0.jar
 	cp -v fcrepo-drupalauthfilter-3.7.0.jar $FEDORA_HOME/tomcat/webapps/fedora/WEB-INF/lib
@@ -97,6 +99,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#
 	# Install islandora
 	#
+	cd /var/www/html/drupal-7.22
 	drush pm-enable -y islandora
 	drush pm-enable -y islandora_solution_pack_audio
 	drush pm-enable -y islandora_ocr
@@ -147,9 +150,9 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
 
 	/usr/local/fedora/tomcat/bin/shutdown.sh
-	sleep 5
+	sleep 10
 	/usr/local/fedora/tomcat/bin/startup.sh
-	sleep 5
+	sleep 20
 	cd $FEDORA_HOME/tomcat/webapps/fedoragsearch/FgsConfig/
 	rm fgsconfig-basic-for-islandora.properties
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
@@ -159,9 +162,9 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configForIslandora/fgsconfigFinal/index/FgsIndexconf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
 	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configProductionSolr/fgsconfigFinal/index/FgsIndex/conf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
 	/usr/local/fedora/tomcat/bin/shutdown.sh
-	sleep 5
+	sleep 10
 	/usr/local/fedora/tomcat/bin/startup.sh
-	sleep 5
+	sleep 10
 	service apache2 restart
 	
 fi
