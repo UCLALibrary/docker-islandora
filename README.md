@@ -13,6 +13,7 @@ Installation
 1. Change into the source directory: `cd docker-islandora`
 1. Build the container: `docker build -rm --tag=islandora .`
 1. Run the docker container: `docker run -t -i -p 80:80 -p 8080:8080 islandora /bin/bash`
+1. Run the installer script: `./install.sh`
 1. Browse to http://localhost:<THE_PORT>/
 1. CTRL+P and CTRL+Q to exit the container shell
 1. View the running containers via `docker ps -a`
