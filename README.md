@@ -1,7 +1,7 @@
 Dockerized Islandora
 ========================
 
-Not working yet! SCRIPT needs some cleaning and parameterization too
+SCRIPT needs some cleaning and parameterizations
 
 A [dockerized](http://docker.io) development instance [Islandora](http://islandora.ca), an open-source software framework designed to help institutions and organizations and their audiences collaboratively manage, and discover digital assets using a best-practices framework. Built on a base of [Drupal](http://drupal.org/), [Fedora Commons](http://www.fedora-commons.org/), and [Solr](http://lucene.apache.org/solr/), Islandora releases solution packs which empower users to work with data types (such as image, video, and pdf) and knowledge domains (such as Chemistry and the Digital Humanities). Solution packs also often provide integration with additional viewers, editors, and data processing applications.
 
@@ -15,6 +15,7 @@ Installation
 1. Run the docker container: `docker run -t -i -p 80:80 -p 8080:8080 islandora /bin/bash`
 1. Run the installer script: `./install.sh`
 1. Browse to http://localhost:<THE_PORT>/
+1. Install the isladora modules from the web interface
 1. CTRL+P and CTRL+Q to exit the container shell
 1. View the running containers via `docker ps -a`
 1. To get a back the docker container: `docker attach [CONTAINER ID]`
