@@ -62,8 +62,6 @@ ADD http://downloads.sourceforge.net/project/djatoka/djatoka/1.1/adore-djatoka-1
 RUN tar -xzvf /tmp/adore-djatoka-1.1.tar.gz -C /tmp
 RUN mv -v /tmp/adore-djatoka-1.1 /opt/djatoka
 ADD https://gist.github.com/ruebot/7eba022ac0f59a530c86/raw/2ed7e054477083202fd275b3288f7833df3b771f/env.sh /opt/djatoka/bin/
-RUN mkdir -p $FEDORA_HOME/tomcat/webapps
-RUN cp /opt/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/djatoka.war
 
 # Fetch Islandora and solution packs
 RUN mkdir -p /var/www/html/drupal-7.22/sites/all/libraries/

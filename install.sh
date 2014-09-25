@@ -15,7 +15,6 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	DRUPAL_DB="drupal"
 	DRUPAL_USER="drupal"
 	DRUPAL_PASSWORD='drupalAdmin'
-
 	MYSQL_PASSWORD='test'
 	
 	# This is so the passwords show up in logs. 
@@ -35,6 +34,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# 
 	# Installing Fedora
 	#
+	rm -rf /usr/local/fedora
 	#java -jar /tmp/fcrepo-installer-3.7.0.jar
 	java -jar /tmp/fcrepo-installer-3.7.0.jar /tmp/install.properties
 	/usr/local/fedora/tomcat/bin/startup.sh 
@@ -94,6 +94,9 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#rm $FEDORA_HOME/server/config/fedora-users.xml
 	#wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
 
+	# Copy Djatoka app
+	cp /opt/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/djatoka.war	
+
 	/usr/local/fedora/tomcat/bin/startup.sh 
 	sleep 20
 
@@ -101,46 +104,45 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	sed -i 's/public $verifyPeer = TRUE;/public $verifyPeer = FALSE;/' /var/www/html/drupal/sites/all/libraries/tuque/HttpConnection.php
 
 	#
-	# Install islandora
+	# Install islandora - DO IT MANUALLY ONCE THE CONNECTION WITH FEDORA HAS BEEN VERIFIED
 	#
-	cd /var/www/html/drupal-7.22
-	drush pm-enable -y -u 1 islandora
-	drush pm-enable -y -u 1 islandora_ocr
-	drush pm-enable -y -u 1 islandora_importer
-	drush pm-enable -y -u 1 islandora_solr_views
-	drush pm-enable -y -u 1 islandora_solr_search
-	drush pm-enable -y -u 1 islandora_paged_content
-	drush pm-enable -y -u 1 islandora_xml_forms
-	drush pm-enable -y -u 1 islandora_jwplayer
-	drush pm-enable -y -u 1 islandora_fits
-	drush pm-enable -y -u 1 islandora_bookmark
-	drush pm-enable -y -u 1 islandora_solution_pack_book
-	drush pm-enable -y -u 1 islandora_solution_pack_audio
-	drush pm-enable -y -u 1 islandora_solution_pack_large_image
-	drush pm-enable -y -u 1 islandora_solution_pack_image
-	drush pm-enable -y -u 1 islandora_solution_pack_collection
-	drush pm-enable -y -u 1 islandora_solution_pack_pdf
-	drush pm-enable -y -u 1 islandora_solution_pack_video
-	drush pm-enable -y -u 1 islandora_solution_pack_newspaper
-	drush pm-enable -y -u 1 islandora_solution_pack_web_archive
-	drush pm-enable -y -u 1 islandora_solution_pack_compound
-	drush pm-enable -y -u 1 islandora_openseadragon
-	drush pm-enable -y -u 1 islandora_marcxml
-	drush pm-enable -y -u 1 islandora_internet_archive_bookreader
-	drush pm-enable -y -u 1 islandora_oai
-	drush pm-enable -y -u 1 islandora_batch
-	drush pm-enable -y -u 1 islandora_bagit
-	drush pm-enable -y -u 1 islandora_premis
-	drush pm-enable -y -u 1 islandora_scholar
-	drush pm-enable -y -u 1 islandora_solr_facet_pages
-	drush pm-enable -y -u 1 islandora_xacml_editor
-	drush pm-enable -y -u 1 islandora_xmlsitemap
-	drush pm-enable -y -u 1 islandora_checksum
-	drush pm-enable -y -u 1 islandora_book_batch
-	drush pm-enable -y -u 1 islandora_solr_metadata
-	drush pm-enable -y -u 1 islandora_image_annotation
-
-	drush updatedb
+	# cd /var/www/html/drupal-7.22
+	# drush pm-enable -y -u 1 islandora
+	# drush pm-enable -y -u 1 islandora_ocr
+	# drush pm-enable -y -u 1 islandora_importer
+	# drush pm-enable -y -u 1 islandora_solr_views
+	# drush pm-enable -y -u 1 islandora_solr_search
+	# drush pm-enable -y -u 1 islandora_paged_content
+	# drush pm-enable -y -u 1 islandora_xml_forms
+	# drush pm-enable -y -u 1 islandora_jwplayer
+	# drush pm-enable -y -u 1 islandora_fits
+	# drush pm-enable -y -u 1 islandora_bookmark
+	# drush pm-enable -y -u 1 islandora_solution_pack_book
+	# drush pm-enable -y -u 1 islandora_solution_pack_audio
+	# drush pm-enable -y -u 1 islandora_solution_pack_large_image
+	# drush pm-enable -y -u 1 islandora_solution_pack_image
+	# drush pm-enable -y -u 1 islandora_solution_pack_collection
+	# drush pm-enable -y -u 1 islandora_solution_pack_pdf
+	# drush pm-enable -y -u 1 islandora_solution_pack_video
+	# drush pm-enable -y -u 1 islandora_solution_pack_newspaper
+	# drush pm-enable -y -u 1 islandora_solution_pack_web_archive
+	# drush pm-enable -y -u 1 islandora_solution_pack_compound
+	# drush pm-enable -y -u 1 islandora_openseadragon
+	# drush pm-enable -y -u 1 islandora_marcxml
+	# drush pm-enable -y -u 1 islandora_internet_archive_bookreader
+	# drush pm-enable -y -u 1 islandora_oai
+	# drush pm-enable -y -u 1 islandora_batch
+	# drush pm-enable -y -u 1 islandora_bagit
+	# drush pm-enable -y -u 1 islandora_premis
+	# drush pm-enable -y -u 1 islandora_scholar
+	# drush pm-enable -y -u 1 islandora_solr_facet_pages
+	# drush pm-enable -y -u 1 islandora_xacml_editor
+	# drush pm-enable -y -u 1 islandora_xmlsitemap
+	# drush pm-enable -y -u 1 islandora_checksum
+	# drush pm-enable -y -u 1 islandora_book_batch
+	# drush pm-enable -y -u 1 islandora_solr_metadata
+	# drush pm-enable -y -u 1 islandora_image_annotation
+	# drush updatedb
 
 	# Set Gsearch
 	cd /tmp; unzip fedoragsearch-2.6.zip;
