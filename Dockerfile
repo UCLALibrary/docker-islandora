@@ -60,8 +60,8 @@ RUN echo 'export FEDORA_HOME=/usr/local/fedora' >> /etc/profile && \
 # Setup DJATOKA
 ADD http://downloads.sourceforge.net/project/djatoka/djatoka/1.1/adore-djatoka-1.1.tar.gz /tmp/
 RUN tar -xzvf /tmp/adore-djatoka-1.1.tar.gz -C /tmp
-RUN mv -v /tmp/adore-djatoka-1.1 /opt/djatoka
-ADD https://gist.github.com/ruebot/7eba022ac0f59a530c86/raw/2ed7e054477083202fd275b3288f7833df3b771f/env.sh /opt/djatoka/bin/
+RUN mv -v /tmp/adore-djatoka-1.1 /usr/local/djatoka
+ADD https://gist.github.com/ruebot/7eba022ac0f59a530c86/raw/2ed7e054477083202fd275b3288f7833df3b771f/env.sh /usr/local/djatoka/bin/
 
 # Fetch Islandora and solution packs
 RUN mkdir -p /var/www/html/drupal-7.22/sites/all/libraries/

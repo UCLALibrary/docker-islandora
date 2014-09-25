@@ -16,6 +16,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	DRUPAL_USER="drupal"
 	DRUPAL_PASSWORD='drupalAdmin'
 	MYSQL_PASSWORD='test'
+	FEDORA_HOME='/usr/local/fedora'
 	
 	# This is so the passwords show up in logs. 
 	echo mysql root password: $MYSQL_PASSWORD
@@ -95,7 +96,12 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
 
 	# Copy Djatoka app
-	cp /opt/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/djatoka.war	
+	cp /usr/local/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/adore-djatoka.war
+	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_compress /usr/local/bin/
+	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_expand /usr/local/bin/
+	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_a60R.so /usr/local/lib/
+	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_jni.so /usr/local/lib/
+	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_v60R.so /usr/local/lib/
 
 	/usr/local/fedora/tomcat/bin/startup.sh 
 	sleep 20
