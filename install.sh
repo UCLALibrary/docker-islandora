@@ -26,6 +26,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	mysqladmin -u root password $MYSQL_PASSWORD
 
 	#setup fedora database
+	mysql -u root -p$MYSQL_PASSWORD  -e "drop database fedora3";
 	mysql -u root -p$MYSQL_PASSWORD  -e "create database fedora3";
 	mysql -u root -p$MYSQL_PASSWORD  -e "GRANT ALL ON "fedora3".* TO 'fedoraAdmin'@'%' IDENTIFIED BY 'fedoraAdmin'";
 	mysql -u root -p$MYSQL_PASSWORD  -e "GRANT ALL ON "fedora3".* TO 'fedoraAdmin'@'localhost' IDENTIFIED BY 'fedoraAdmin'";
@@ -48,16 +49,18 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	mkdir /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
 	cp -v /var/www/html/drupal-7.22/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
 	#rm $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
-	sed -i 's/value="enforce-policies"/value="permit-all-requests"/' /usr/local/fedora/server/config/fedora.fcfg
+	#sed -i 's/value="enforce-policies"/value="permit-all-requests"/' /usr/local/fedora/server/config/fedora.fcfg
 	/usr/local/fedora/server/bin/fedora-reload-policies.sh
-	
-	$FEDORA_HOME/tomcat/bin/startup.sh
+	/usr/local/fedora/tomcat/bin/startup.sh 
+	sleep 20
+	/usr/local/fedora/tomcat/bin/shutdown.sh
 	sleep 10
 
 	# 
 	# Install Drupal
 	#
 	service apache2 stop
+	mysql -u root -p$MYSQL_PASSWORD  -e "drop database drupal";
 	mysql -uroot -p$MYSQL_PASSWORD -e "CREATE DATABASE drupal; GRANT ALL ON drupal.* TO '$DRUPAL_USER'@'localhost' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
 	mysql -uroot -p$MYSQL_PASSWORD -e "GRANT ALL ON drupal.* TO 'drupal'@'%' IDENTIFIED BY '$DRUPAL_PASSWORD'; FLUSH PRIVILEGES;"
 	sed -i 's/min_uid=100/min_uid=30/' /etc/suphp/suphp.conf
@@ -81,21 +84,18 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#
 	# Configure Drupal Filter
 	#
-	/usr/local/fedora/tomcat/bin/shutdown.sh
-	sleep 10
 	cd /tmp
 	wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.0.jar
-	#wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.1.jar
-	cp -v fcrepo-drupalauthfilter-3.7.0.jar /usr/local/fedora/tomcat/webapps/fedora/WEB-INF/lib
+	cp -v fcrepo-drupalauthfilter-3.7.0.jar $FEDORA_HOME/tomcat/webapps/fedora/WEB-INF/lib
 	cd /usr/local/fedora/server/config
-	rm jaas.conf
+	mv jaas.conf jaas.conf.bk
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/jaas.conf
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/filter-drupal.xml
-	rm $FEDORA_HOME/server/config/fedora-users.xml
-	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
+	#rm $FEDORA_HOME/server/config/fedora-users.xml
+	#wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
 
-	/usr/local/fedora/tomcat/bin/startup.sh
-	sleep 10
+	/usr/local/fedora/tomcat/bin/startup.sh 
+	sleep 20
 
 	# Tuque library - disable peer certificate validation on tuque library
 	sed -i 's/public $verifyPeer = TRUE;/public $verifyPeer = FALSE;/' /var/www/html/drupal/sites/all/libraries/tuque/HttpConnection.php
@@ -156,11 +156,11 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	sleep 10
 	/usr/local/fedora/tomcat/bin/startup.sh
 	sleep 20
+
 	cd $FEDORA_HOME/tomcat/webapps/fedoragsearch/FgsConfig/
 	rm fgsconfig-basic-for-islandora.properties
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
 	ant -f fgsconfig-basic.xml
-
 	
 	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configForIslandora/fgsconfigFinal/index/FgsIndexconf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
 	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configProductionSolr/fgsconfigFinal/index/FgsIndex/conf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
