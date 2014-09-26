@@ -99,11 +99,11 @@ RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https:
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_solution_pack_newspaper.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_xacml_editor.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_xmlsitemap.git;
+RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/Islandora/islandora_book_batch.git
 
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/ruebot/islandora_solution_pack_web_archive.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone -b 7.x-1.3 https://github.com/ruebot/islandora_checksum.git;
 
-RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/adam-vessey/islandora_book_batch.git;
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/adam-vessey/islandora_solr_metadata.git;
 
 RUN cd /var/www/html/drupal-7.22/sites/all/modules/; git clone https://github.com/ppound/islandora_image_annotation.git;

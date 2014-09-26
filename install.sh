@@ -37,6 +37,11 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	sed -i 's/post_max_size = 8M/post_max_size = 2048M/' /etc/php5/cgi/php.ini
 	sed -i 's/memory_limit = 128M/memory_limit = 256M/' /etc/php5/cgi/php.ini
 
+	ln -s /usr/local/stow/tesseract-ocr/bin/tesseract /usr/bin/tesseract
+	ln -s /usr/local/stow/ffmpeg-1.1.14/bin/ffprobe /usr/bin/ffprobe
+	ln -s /usr/local/stow/ffmpeg-1.1.14/bin/ffserver /usr/bin/server 
+	ln -s /usr/local/stow/ffmpeg-1.1.14/bin/ffmpeg /usr/bin/ffmpeg
+
 	#setup fedora database
 	mysql -u root -p$MYSQL_PASSWORD  -e "drop database fedora3";
 	mysql -u root -p$MYSQL_PASSWORD  -e "create database fedora3";
@@ -189,8 +194,8 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	rm fgsconfig-basic.xml
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic.xml
 	ant -f fgsconfig-basic.xml
-	mv -v /usr/local/fedora/solr/collection1/conf/schema.xml $FEDORA_HOME/solr/collection1/conf/schema.bak
-	cp -v /usr/local/fedora/tomcat/webapps/fedoragsearch/WEB-INF/classes/fgsconfigFinal/index/FgsIndex/conf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
+	mv -v /usr/local/fedora/solr/collection1/conf/schema.xml /usr/local/fedora/solr/collection1/conf/schema.bak
+	cp -v /usr/local/fedora/tomcat/webapps/fedoragsearch/WEB-INF/classes/fgsconfigFinal/index/FgsIndex/conf/schema-4.2.0-for-fgs-2.6.xml /usr/local/fedora/solr/collection1/conf/schema.xml
 	cd /usr/local/fedora/tomcat/conf/Catalina/localhost/
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/solr.xml
 
