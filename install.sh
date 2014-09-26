@@ -25,6 +25,18 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	echo $DRUPAL_PASSWORD > /drupal-db-pw.txt
 	mysqladmin -u root password $MYSQL_PASSWORD
 
+	sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 2048M/' /etc/php5/apache2/php.ini
+	sed -i 's/post_max_size = 8M/post_max_size = 2048M/' /etc/php5/apache2/php.ini
+	sed -i 's/memory_limit = 128M/memory_limit = 256M/' /etc/php5/apache2/php.ini	
+
+	sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 2048M/' /etc/php5/cli/php.ini
+	sed -i 's/post_max_size = 8M/post_max_size = 2048M/' /etc/php5/cli/php.ini
+	sed -i 's/memory_limit = 128M/memory_limit = 256M/' /etc/php5/cli/php.ini
+
+	sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 2048M/' /etc/php5/cgi/php.ini
+	sed -i 's/post_max_size = 8M/post_max_size = 2048M/' /etc/php5/cgi/php.ini
+	sed -i 's/memory_limit = 128M/memory_limit = 256M/' /etc/php5/cgi/php.ini
+
 	#setup fedora database
 	mysql -u root -p$MYSQL_PASSWORD  -e "drop database fedora3";
 	mysql -u root -p$MYSQL_PASSWORD  -e "create database fedora3";
@@ -92,8 +104,6 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	mv jaas.conf jaas.conf.bk
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/jaas.conf
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/filter-drupal.xml
-	#rm $FEDORA_HOME/server/config/fedora-users.xml
-	#wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
 
 	# Copy Djatoka app
 	cp /usr/local/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/adore-djatoka.war
@@ -105,7 +115,9 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	ldconfig
 
 	sed -i 's/exec "$PRGDIR"\/"$EXECUTABLE" start "$@"/. \/usr\/local\/djatoka\/bin\/env.sh \n export JAVA_OPTS \n echo $JAVA_OPTS \n exec "$PRGDIR"\/"$EXECUTABLE" start "$@"/' /usr/local/fedora/tomcat/bin/startup.sh
+	# also from wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/startup.sh
 	sed -i 's/JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true -Dkakadu.home=$KAKADU_HOME -Djava.library.path=$LIBPATH\/$PLATFORM $KAKADU_LIBRARY_PATH"/JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true -Xmx512M -Xms64M -XX:PermSize=128M -XX:MaxPermSize=512m -Dkakadu.home=$KAKADU_HOME -Djava.library.path=$LIBPATH\/$PLATFORM $KAKADU_LIBRARY_PATH"/' /usr/local/djatoka/bin/env.sh
+	# also from wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/env.sh
 
 	/usr/local/fedora/tomcat/bin/startup.sh 
 	sleep 20
@@ -154,28 +166,34 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# drush pm-enable -y -u 1 islandora_image_annotation
 	# drush updatedb
 
+	# 
 	# Set Gsearch
+	#
 	cd /tmp; unzip fedoragsearch-2.6.zip;
 	cp -v fedoragsearch-2.6/fedoragsearch.war /usr/local/fedora/tomcat/webapps
 
+	#
 	# Set Solr
+	#
 	cd /tmp; tar -xzvf solr-4.2.0.tgz; 
 	mkdir -p /usr/local/fedora/solr; 
 	cp -Rv solr-4.2.0/example/solr/* /usr/local/fedora/solr; 
 	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
-
-	/usr/local/fedora/tomcat/bin/shutdown.sh
-	sleep 10
-	/usr/local/fedora/tomcat/bin/startup.sh
-	sleep 20
+ 	cd $FEDORA_HOME/server/config/
+ 	rm $FEDORA_HOME/server/config/fedora-users.xml
+	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
 
 	cd $FEDORA_HOME/tomcat/webapps/fedoragsearch/FgsConfig/
 	rm fgsconfig-basic-for-islandora.properties
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
+	rm fgsconfig-basic.xml
+	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic.xml
 	ant -f fgsconfig-basic.xml
-	
-	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configForIslandora/fgsconfigFinal/index/FgsIndexconf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
-	#cp /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/configProductionSolr/fgsconfigFinal/index/FgsIndex/conf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
+	mv -v /usr/local/fedora/solr/collection1/conf/schema.xml $FEDORA_HOME/solr/collection1/conf/schema.bak
+	cp -v /usr/local/fedora/tomcat/webapps/fedoragsearch/WEB-INF/classes/fgsconfigFinal/index/FgsIndex/conf/schema-4.2.0-for-fgs-2.6.xml $FEDORA_HOME/solr/collection1/conf/schema.xml
+	cd /usr/local/fedora/tomcat/conf/Catalina/localhost/
+	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/solr.xml
+
 	/usr/local/fedora/tomcat/bin/shutdown.sh
 	sleep 10
 	/usr/local/fedora/tomcat/bin/startup.sh

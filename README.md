@@ -13,12 +13,13 @@ Installation
 1. Change into the source directory: `cd docker-islandora`
 1. Build the container: `docker build -rm --tag=islandora .`
 1. Run the docker container: `docker run -t -i -p 80:80 -p 8080:8080 islandora /bin/bash`
-1. Run the installer script: `./install.sh`
-1. Browse to http://localhost:<THE_PORT>/
+1. Run the installer/configuration script script: `./install.sh`
+1. Browse to http://localhost
 1. Install the isladora modules from the web interface
 1. CTRL+P and CTRL+Q to exit the container shell
 1. View the running containers via `docker ps -a`
 1. To get a back the docker container: `docker attach [CONTAINER ID]`
+1. To commit the changes made to a container: `docker commit [CONTAINER ID] [SOME IMAGE NAME]`
 1. To stop a running container: `docker stop [CONTAINER ID]`
 1. To stop all running containers: `docker ps -a | grep '<none>' | awk '{print $1}' | xargs docker rm`
 1. To delete all the docker images: `docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi`
