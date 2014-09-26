@@ -97,11 +97,15 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 
 	# Copy Djatoka app
 	cp /usr/local/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/adore-djatoka.war
-	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_compress /usr/local/bin/
-	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_expand /usr/local/bin/
-	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_a60R.so /usr/local/lib/
-	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_jni.so /usr/local/lib/
-	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_v60R.so /usr/local/lib/
+	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_compress /usr/bin/
+	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_expand /usr/bin/
+	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_a60R.so /usr/lib/
+	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_jni.so /usr/lib/
+	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_v60R.so /usr/lib/
+	ldconfig
+
+	sed -i 's/exec "$PRGDIR"\/"$EXECUTABLE" start "$@"/. \/usr\/local\/djatoka\/bin\/env.sh \n export JAVA_OPTS \n echo $JAVA_OPTS \n exec "$PRGDIR"\/"$EXECUTABLE" start "$@"/' /usr/local/fedora/tomcat/bin/startup.sh
+	sed -i 's/JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true -Dkakadu.home=$KAKADU_HOME -Djava.library.path=$LIBPATH\/$PLATFORM $KAKADU_LIBRARY_PATH"/JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true -Xmx512M -Xms64M -XX:PermSize=128M -XX:MaxPermSize=512m -Dkakadu.home=$KAKADU_HOME -Djava.library.path=$LIBPATH\/$PLATFORM $KAKADU_LIBRARY_PATH"/' /usr/local/djatoka/bin/env.sh
 
 	/usr/local/fedora/tomcat/bin/startup.sh 
 	sleep 20
