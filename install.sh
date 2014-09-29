@@ -199,6 +199,12 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	cd /usr/local/fedora/tomcat/conf/Catalina/localhost/
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/solr.xml
 
+	#
+	# Set Fits
+	#
+	chmod 755 /opt/fits-0.6.2/fits.sh
+	#Specify manually the home of fits: FITS_HOME="/opt/fits-0.6.2" in fits.sh
+
 	/usr/local/fedora/tomcat/bin/shutdown.sh
 	sleep 10
 	/usr/local/fedora/tomcat/bin/startup.sh
