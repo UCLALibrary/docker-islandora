@@ -203,7 +203,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# Set Fits
 	#
 	chmod 755 /opt/fits-0.6.2/fits.sh
-	#Specify manually the home of fits: FITS_HOME="/opt/fits-0.6.2" in fits.sh
+	sed -i '/FITS_HOME=/c\FITS_HOME=/opt/fits-0.6.2' /opt/fits-0.6.2/fits.sh
 
 	/usr/local/fedora/tomcat/bin/shutdown.sh
 	sleep 10
