@@ -30,4 +30,5 @@ Islandora Configuration
 
 1. Choose Image Toolkit -> ImageMagick as image processing toolkit
 1. Specify the `convert` path: `/usr/bin/convert`
-1. Islandora -> Page Content Module -> djatoka URL specify the correct url
+1. Islandora -> Page Content Module -> djatoka URL: specify the correct url
+1. Islandora -> Solr index -> solr URL: specify the correct url

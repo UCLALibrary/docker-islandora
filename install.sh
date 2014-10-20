@@ -66,7 +66,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	# Copy islandora XACML policies
 	mkdir /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
 	cp -v /var/www/html/drupal-7.22/sites/all/modules/islandora/policies/* /usr/local/fedora/data/fedora-xacml-policies/repository-policies/islandora
-	#rm $FEDORA_HOME/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
+	#rm /usr/local/fedora/data/fedora-xacml-policies/repository-policies/default/deny-apim-if-not-localhost.xml
 	#sed -i 's/value="enforce-policies"/value="permit-all-requests"/' /usr/local/fedora/server/config/fedora.fcfg
 	/usr/local/fedora/server/bin/fedora-reload-policies.sh
 	/usr/local/fedora/tomcat/bin/startup.sh 
@@ -93,10 +93,13 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	service apache2 start
 
 	drush site-install standard -y --account-name=admin --account-pass=admin --db-url="mysqli://drupal:${DRUPAL_PASSWORD}@localhost:3306/drupal"
-	drush pm-download -y views advanced_help ctools imagemagick token libraries
+	drush pm-download -y views advanced_help ctools imagemagick token libraries omega panels
 	drush pm-enable -y views advanced_help ctools imagemagick token libraries
 	drush pm-enable -y objective_forms
 	drush pm-enable -y php_lib
+	drush pm-enable -y views_ui
+	drush pm-enable -y omega
+	drush pm-enable -y panels
 	service apache2 restart
 
 	#
@@ -104,14 +107,14 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	#
 	cd /tmp
 	wget https://github.com/Islandora/islandora_drupal_filter/releases/download/v7.1.3/fcrepo-drupalauthfilter-3.7.0.jar
-	cp -v fcrepo-drupalauthfilter-3.7.0.jar $FEDORA_HOME/tomcat/webapps/fedora/WEB-INF/lib
+	cp -v fcrepo-drupalauthfilter-3.7.0.jar /usr/local/fedora/tomcat/webapps/fedora/WEB-INF/lib
 	cd /usr/local/fedora/server/config
 	mv jaas.conf jaas.conf.bk
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/jaas.conf
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/filter-drupal.xml
 
 	# Copy Djatoka app
-	cp /usr/local/djatoka/dist/adore-djatoka.war $FEDORA_HOME/tomcat/webapps/adore-djatoka.war
+	cp /usr/local/djatoka/dist/adore-djatoka.war /usr/local/fedora/tomcat/webapps/adore-djatoka.war
 	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_compress /usr/bin/
 	ln -s /usr/local/djatoka/bin/Linux-x86-64/kdu_expand /usr/bin/
 	ln -s /usr/local/djatoka/lib/Linux-x86-64/libkdu_a60R.so /usr/lib/
@@ -184,11 +187,11 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	mkdir -p /usr/local/fedora/solr; 
 	cp -Rv solr-4.2.0/example/solr/* /usr/local/fedora/solr; 
 	cp -v solr-4.2.0/dist/solr-4.2.0.war /usr/local/fedora/tomcat/webapps/solr.war
- 	cd $FEDORA_HOME/server/config/
- 	rm $FEDORA_HOME/server/config/fedora-users.xml
+ 	cd /usr/local/fedora/server/config/
+ 	rm /usr/local/fedora/server/config/fedora-users.xml
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fedora-users.xml
 
-	cd $FEDORA_HOME/tomcat/webapps/fedoragsearch/FgsConfig/
+	cd /usr/local/fedora/tomcat/webapps/fedoragsearch/FgsConfig/
 	rm fgsconfig-basic-for-islandora.properties
 	wget https://raw.githubusercontent.com/namka/configurations/master/fedora-370/fgsconfig-basic-for-islandora.properties
 	rm fgsconfig-basic.xml
