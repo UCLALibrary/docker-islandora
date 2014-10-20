@@ -86,6 +86,7 @@ if [ ! -f /var/www/sites/default/settings.php ]; then
 	sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www\/html\/drupal/' /etc/apache2/sites-available/000-default.conf
 	sed -i '/DocumentRoot \/var\/www\/html\/drupal/a <Directory "/var/www/html/drupal"> \n Options Includes \n AllowOverride All \n </Directory>' /etc/apache2/sites-available/000-default.conf
 	a2enmod rewrite vhost_alias
+	rm /var/www/html/index.html 
 	cd /var/www/html/drupal-7.22
 	ln -s  /var/www/html/drupal-7.22 /var/www/html/drupal
 	chmod a+w sites/default/settings.php
